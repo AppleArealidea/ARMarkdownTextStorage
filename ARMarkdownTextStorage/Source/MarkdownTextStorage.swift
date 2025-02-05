@@ -10,6 +10,7 @@ import UIKit
 
 @objc public class MarkdownTextStorage: NSTextStorage {
     @objc let backingStore = NSMutableAttributedString()
+    private var cachedString: String?
     
     private var highlighters: [RegularExpressionHighlighter]!
     private var normalFont: UIFont
@@ -46,12 +47,18 @@ import UIKit
     }
     
     override public func processEditing() {
+        cachedString = nil
         performReplacementsForRange(changedRange: editedRange)
         super.processEditing()
     }
     
     public override var string: String {
-        self.backingStore.string
+        if let cached = cachedString {
+            return cached
+        }
+        let newString = backingStore.string
+        cachedString = newString
+        return newString
     }
     
     private func performReplacementsForRange(changedRange: NSRange) {

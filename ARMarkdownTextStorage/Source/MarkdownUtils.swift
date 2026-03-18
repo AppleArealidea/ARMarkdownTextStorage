@@ -49,6 +49,11 @@ public struct RegularExpressionPatterns {
     static let italic = "(\(italicSymbol))(.+?)(\\1)"
     static let strikethrough = "(\(strikethroughSymbol))(.+?)(\\1)"
     static let underline = "(\(underlineSymbol))(.+?)(\\1)"
+    
+    static let boldRegex = try! NSRegularExpression(pattern: bold, options: .dotMatchesLineSeparators)
+    static let italicRegex = try! NSRegularExpression(pattern: italic, options: .dotMatchesLineSeparators)
+    static let strikethroughRegex = try! NSRegularExpression(pattern: strikethrough, options: .dotMatchesLineSeparators)
+    static let underlineRegex = try! NSRegularExpression(pattern: underline, options: .dotMatchesLineSeparators)
 }
 
 struct RegularExpressionHighlighter {

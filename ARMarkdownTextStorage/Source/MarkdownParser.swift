@@ -15,10 +15,10 @@ public class MarkdownParser: NSObject {
     
     private var defaultTextAttributes: [NSAttributedString.Key: Any]!
     
-    public static func attributedString(fromMardown markdown: String,
+    public static func attributedString(fromMarkdown markdown: String,
                                         font: UIFont,
                                         color: UIColor? = nil,
-                                        maxSymbolsCount: Int = 0) -> (attributedString: NSAttributedString, isCutted: Bool) {
+                                        maxSymbolsCount: Int = 0) -> (attributedString: NSAttributedString, isTruncated: Bool) {
         let parser = MarkdownParser()
         
         parser.baseFont = font
@@ -33,11 +33,11 @@ public class MarkdownParser: NSObject {
         parser.working = NSMutableAttributedString(string: markdown, attributes: parser.defaultTextAttributes)
         parser.parse()
         
-        var cutted = false
+        var truncated = false
         if maxSymbolsCount > 0 {
-            cutted = parser.substring(withMaxSymbolsCount: maxSymbolsCount)
+            truncated = parser.substring(withMaxSymbolsCount: maxSymbolsCount)
         }
-        return (parser.working, cutted)
+        return (parser.working, truncated)
     }
     
     private func parse() {
@@ -57,9 +57,9 @@ public class MarkdownParser: NSObject {
     
     private func substring(withMaxSymbolsCount maxLength: Int) -> Bool {
         guard working.length > maxLength else {return false}
-        let cuttedString = NSMutableAttributedString(attributedString: working.attributedSubstring(from: NSRange(location: 0, length: maxLength)))
-        cuttedString.append(NSAttributedString(string: "...", attributes: defaultTextAttributes))
-        working = cuttedString
+        let truncatedString = NSMutableAttributedString(attributedString: working.attributedSubstring(from: NSRange(location: 0, length: maxLength)))
+        truncatedString.append(NSAttributedString(string: "...", attributes: defaultTextAttributes))
+        working = truncatedString
         return true
     }
     

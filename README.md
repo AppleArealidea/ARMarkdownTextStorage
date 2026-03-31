@@ -84,7 +84,7 @@ let input = "**Bold** and __italic__ with ~~strikethrough~~"
 let font = UIFont.systemFont(ofSize: 16)
 
 let (attributedString, isTruncated) = MarkdownParser.attributedString(
-    fromMardown: input,
+    fromMarkdown: input,
     font: font
 )
 ```
@@ -93,7 +93,7 @@ With optional text color and max length:
 
 ```swift
 let (attributedString, isTruncated) = MarkdownParser.attributedString(
-    fromMardown: input,
+    fromMarkdown: input,
     font: font,
     color: .label,
     maxSymbolsCount: 100

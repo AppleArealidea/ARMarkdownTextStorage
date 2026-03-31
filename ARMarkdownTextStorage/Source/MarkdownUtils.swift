@@ -13,9 +13,10 @@ func createAttributesForFont(
     withTrait trait: UIFontDescriptor.SymbolicTraits
 ) -> [NSAttributedString.Key: Any] {
     let fontDescriptor = font.fontDescriptor
-    let descriptorWithTrait = fontDescriptor.withSymbolicTraits(trait)
-    let font = UIFont(descriptor: descriptorWithTrait!, size: 0)
-    return [.font: font]
+    guard let descriptorWithTrait = fontDescriptor.withSymbolicTraits(trait) else {
+        return [.font: font]
+    }
+    return [.font: UIFont(descriptor: descriptorWithTrait, size: 0)]
 }
 
 func fontWithBoldTrait(
@@ -24,7 +25,7 @@ func fontWithBoldTrait(
     fontName: String,
     fontSize: CGFloat
 ) -> UIFont {
-    let font = UIFont(name: fontName, size: fontSize)!
+    let font = UIFont(name: fontName, size: fontSize) ?? .systemFont(ofSize: fontSize)
     let fontDescriptor = font.fontDescriptor
     
     var traits = UIFontDescriptor.SymbolicTraits(rawValue: 0)
@@ -35,8 +36,10 @@ func fontWithBoldTrait(
         traits.insert(.traitItalic)
     }
     
-    let descriptorWithTrait = fontDescriptor.withSymbolicTraits(traits)
-    return UIFont(descriptor: descriptorWithTrait!, size: fontSize)
+    guard let descriptorWithTrait = fontDescriptor.withSymbolicTraits(traits) else {
+        return font
+    }
+    return UIFont(descriptor: descriptorWithTrait, size: fontSize)
 }
 
 public struct RegularExpressionPatterns {

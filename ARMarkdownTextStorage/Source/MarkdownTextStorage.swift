@@ -94,7 +94,7 @@ import UIKit
                             if let appliesFont = highlighter.attributes[NSAttributedString.Key.font] as? UIFont,
                                 let currentFont = dictionary[NSAttributedString.Key.font] as? UIFont {
                                 let newFont = fontWithBoldTrait(appliesFont.isBold || currentFont.isBold,
-                                                                italicTrait: appliesFont.isItalic || appliesFont.isItalic,
+                                                                italicTrait: appliesFont.isItalic || currentFont.isItalic,
                                                                 fontName: appliesFont.familyName,
                                                                 fontSize: appliesFont.pointSize)
                                 addAttribute(NSAttributedString.Key.font, value: newFont, range: range)

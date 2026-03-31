@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 @objc public class MarkdownTextStorage: NSTextStorage {
-    @objc let backingStore = NSMutableAttributedString()
+    private let backingStore = NSMutableAttributedString()
     private var cachedString: String?
     
     private var highlighters: [RegularExpressionHighlighter]!

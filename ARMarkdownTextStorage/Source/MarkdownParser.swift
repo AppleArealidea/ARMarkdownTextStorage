@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-public class MarkdownParser: NSObject {
+public class MarkdownParser {
     private var working: NSMutableAttributedString!
     private var baseFont: UIFont!
     private var baseColor: UIColor?

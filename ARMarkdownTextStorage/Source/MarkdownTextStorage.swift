@@ -131,6 +131,9 @@ import UIKit
     
     public func setDefaultFont(_ font: UIFont) {
         normalFont = font
+        createHighlightPatterns()
+        beginEditing()
         edited(.editedAttributes, range: NSRange(location: 0, length: backingStore.length), changeInLength: 0)
+        endEditing()
     }
 }

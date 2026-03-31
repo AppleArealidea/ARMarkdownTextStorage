@@ -86,31 +86,26 @@ import UIKit
         guard !backingStore.string.hasPrefix("@@") else { return }
         
         for highlighter in highlighters {
-            do {
-                let regex = try NSRegularExpression(pattern: highlighter.pattern)
-                regex.enumerateMatches(in: backingStore.string, range: searchRange) { match, _, _ in
-                    if let matchRange = match?.range(at: 0) {
-                        enumerateAttributes(in: matchRange, options: .longestEffectiveRangeNotRequired, using: { dictionary, range, _ in
-                            if let appliesFont = highlighter.attributes[NSAttributedString.Key.font] as? UIFont,
-                                let currentFont = dictionary[NSAttributedString.Key.font] as? UIFont {
-                                let newFont = fontWithBoldTrait(appliesFont.isBold || currentFont.isBold,
-                                                                italicTrait: appliesFont.isItalic || currentFont.isItalic,
-                                                                fontName: appliesFont.familyName,
-                                                                fontSize: appliesFont.pointSize)
-                                addAttribute(NSAttributedString.Key.font, value: newFont, range: range)
-                            } else {
-                                addAttributes(highlighter.attributes, range: range)
-                            }
-                        })
-                        
-                        let maxRange = matchRange.location + matchRange.length
-                        if maxRange + 1 < length {
-                            addAttributes(normalAttrs, range: NSRange(location: maxRange, length: 1))
+            highlighter.regex.enumerateMatches(in: backingStore.string, range: searchRange) { match, _, _ in
+                if let matchRange = match?.range(at: 0) {
+                    enumerateAttributes(in: matchRange, options: .longestEffectiveRangeNotRequired, using: { dictionary, range, _ in
+                        if let appliesFont = highlighter.attributes[NSAttributedString.Key.font] as? UIFont,
+                            let currentFont = dictionary[NSAttributedString.Key.font] as? UIFont {
+                            let newFont = fontWithBoldTrait(appliesFont.isBold || currentFont.isBold,
+                                                            italicTrait: appliesFont.isItalic || currentFont.isItalic,
+                                                            fontName: appliesFont.familyName,
+                                                            fontSize: appliesFont.pointSize)
+                            addAttribute(NSAttributedString.Key.font, value: newFont, range: range)
+                        } else {
+                            addAttributes(highlighter.attributes, range: range)
                         }
+                    })
+                    
+                    let maxRange = matchRange.location + matchRange.length
+                    if maxRange + 1 < length {
+                        addAttributes(normalAttrs, range: NSRange(location: maxRange, length: 1))
                     }
                 }
-            } catch {
-                print(error)
             }
         }
     }
@@ -122,10 +117,10 @@ import UIKit
         let underlineAttributes = [NSAttributedString.Key.underlineStyle: 2]
         
         highlighters = [
-            RegularExpressionHighlighter(pattern: RegularExpressionPatterns.bold, attributes: boldAttributes),
-            RegularExpressionHighlighter(pattern: RegularExpressionPatterns.italic, attributes: italicAttributes),
-            RegularExpressionHighlighter(pattern: RegularExpressionPatterns.strikethrough, attributes: strikethroughAttributes),
-            RegularExpressionHighlighter(pattern: RegularExpressionPatterns.underline, attributes: underlineAttributes)
+            RegularExpressionHighlighter(regex: RegularExpressionPatterns.boldRegex, attributes: boldAttributes),
+            RegularExpressionHighlighter(regex: RegularExpressionPatterns.italicRegex, attributes: italicAttributes),
+            RegularExpressionHighlighter(regex: RegularExpressionPatterns.strikethroughRegex, attributes: strikethroughAttributes),
+            RegularExpressionHighlighter(regex: RegularExpressionPatterns.underlineRegex, attributes: underlineAttributes)
         ]
     }
     

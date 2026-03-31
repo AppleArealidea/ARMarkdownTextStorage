@@ -60,7 +60,7 @@ public struct RegularExpressionPatterns {
 }
 
 struct RegularExpressionHighlighter {
-    let pattern: String
+    let regex: NSRegularExpression
     let attributes: [NSAttributedString.Key: Any]
 }
 

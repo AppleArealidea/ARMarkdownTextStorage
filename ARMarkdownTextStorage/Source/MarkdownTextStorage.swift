@@ -68,7 +68,7 @@ import UIKit
                 .lineRange(for: NSRange(location: changedRange.location, length: 0))
         )
         extendedRange = NSUnionRange(
-            changedRange,
+            extendedRange,
             NSString(string: backingStore.string)
                 .lineRange(for: NSRange(location: NSMaxRange(changedRange), length: 0))
         )

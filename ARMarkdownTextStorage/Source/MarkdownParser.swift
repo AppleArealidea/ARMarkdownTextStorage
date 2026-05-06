@@ -47,7 +47,7 @@ public class MarkdownParser {
         if let color = baseColor {
             strikethroughAttributes[.kCTForegroundColor] = color.cgColor
         }
-        let underlineAttributes = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.thick.rawValue]
+        let underlineAttributes = [NSAttributedString.Key.underlineStyle: NSUnderlineStyle.double.rawValue]
         
         applyParser(regex: RegularExpressionPatterns.boldRegex, attributes: boldAttributes)
         applyParser(regex: RegularExpressionPatterns.italicRegex, attributes: italicAttributes)

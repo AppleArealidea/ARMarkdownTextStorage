@@ -220,15 +220,14 @@ import UIKit
             var idx = chunk.location
             let end = NSMaxRange(chunk)
             while idx < end {
-                var eff = NSRange()
-                _ = attributes(at: idx, effectiveRange: &eff)
-                let clamped = NSIntersectionRange(eff, chunk)
+                let composed = (backingStore.string as NSString).rangeOfComposedCharacterSequence(at: idx)
+                let clamped = NSIntersectionRange(composed, chunk)
                 guard clamped.length > 0 else { break }
                 let chunkAttrs = attributes(at: clamped.location, effectiveRange: nil)
                 let font = chunkAttrs[.font] as? UIFont
                 let strike = (chunkAttrs[.strikethroughStyle] as? NSNumber)?.intValue ?? (chunkAttrs[.strikethroughStyle] as? Int) ?? 0
-                if needsMarkdownBaseReset(currentFont: font, strikeRaw: strike) {
-                    addAttributes(baseResetAttrs, range: clamped)
+                if needsMarkdownBaseReset(currentFont: font, strikeRaw: strike, range: clamped) {
+                    addAttributes(baseResetAttributes(from: baseResetAttrs, for: clamped), range: clamped)
                 }
                 idx = NSMaxRange(clamped)
             }
@@ -243,14 +242,17 @@ import UIKit
         let attrs = attributes(at: range.location, effectiveRange: nil)
         let font = attrs[.font] as? UIFont
         let strike = (attrs[.strikethroughStyle] as? NSNumber)?.intValue ?? (attrs[.strikethroughStyle] as? Int) ?? 0
-        if needsMarkdownBaseReset(currentFont: font, strikeRaw: strike) {
-            addAttributes(baseResetAttrs, range: range)
+        if needsMarkdownBaseReset(currentFont: font, strikeRaw: strike, range: range) {
+            addAttributes(baseResetAttributes(from: baseResetAttrs, for: range), range: range)
         }
     }
     
     /// UITextView typing often uses a body font instance that is not `==` to `normalFont.fontDescriptor`
     /// even when point size and bold/italic match — avoid useless `editedAttributes` churn.
     private func fontsMatchBodyBase(_ a: UIFont, _ b: UIFont) -> Bool {
+        if a.fontName.localizedCaseInsensitiveContains("emoji") {
+            return false
+        }
         let ta = a.fontDescriptor.symbolicTraits.intersection([.traitBold, .traitItalic])
         let tb = b.fontDescriptor.symbolicTraits.intersection([.traitBold, .traitItalic])
         return abs(a.pointSize - b.pointSize) < 0.01 && ta == tb
@@ -285,10 +287,28 @@ import UIKit
         return true
     }
     
-    private func needsMarkdownBaseReset(currentFont: UIFont?, strikeRaw: Int) -> Bool {
+    private func needsMarkdownBaseReset(currentFont: UIFont?, strikeRaw: Int, range: NSRange) -> Bool {
+        if isEmojiOnlyRange(range) { return false }
         if strikeRaw != 0 { return true }
         guard let f = currentFont else { return true }
         return !fontsMatchBodyBase(f, normalFont)
+    }
+
+    private func isEmojiOnlyRange(_ range: NSRange) -> Bool {
+        guard range.length > 0, NSMaxRange(range) <= backingStore.length else { return false }
+        let substring = (backingStore.string as NSString).substring(with: range)
+        guard !substring.isEmpty else { return false }
+        return substring.unicodeScalars.allSatisfy { scalar in
+            scalar.properties.isEmojiPresentation || (scalar.value > 0x238C && scalar.properties.isEmoji)
+        }
+    }
+
+    private func baseResetAttributes(
+        from baseResetAttrs: [NSAttributedString.Key: Any],
+        for range: NSRange
+    ) -> [NSAttributedString.Key: Any] {
+        guard isEmojiOnlyRange(range) else { return baseResetAttrs }
+        return baseResetAttrs.filter { $0.key != .font }
     }
 
     private func createHighlightPatterns() {

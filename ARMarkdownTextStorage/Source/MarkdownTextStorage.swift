@@ -28,24 +28,43 @@ import UIKit
         fatalError()
     }
     
+    /// On iOS the text-input subsystem (predictive text, dictation, marked text) can hand this
+    /// custom `NSTextStorage` a range whose end exceeds `backingStore.length` before the backing
+    /// store has caught up. Forwarding such a range straight to `backingStore` throws
+    /// `NSRangeException` and crashes the app, so every primitive clamps the range first.
+    private func clampedRange(_ range: NSRange) -> NSRange {
+        let storeLength = backingStore.length
+        let location = min(max(range.location, 0), storeLength)
+        let length = min(max(range.length, 0), storeLength - location)
+        return NSRange(location: location, length: length)
+    }
+    
     override public func attributes(at location: Int,
                                     effectiveRange range: NSRangePointer? ) -> [NSAttributedString.Key: Any] {
-        return backingStore.attributes(at: location, effectiveRange: range)
+        let storeLength = backingStore.length
+        guard storeLength > 0 else {
+            range?.pointee = NSRange(location: 0, length: 0)
+            return [:]
+        }
+        let safeLocation = min(max(location, 0), storeLength - 1)
+        return backingStore.attributes(at: safeLocation, effectiveRange: range)
     }
     
     override public func replaceCharacters(in range: NSRange, with str: String) {
+        let safeRange = clampedRange(range)
         beginEditing()
-        backingStore.replaceCharacters(in: range, with: str)
+        backingStore.replaceCharacters(in: safeRange, with: str)
         edited(.editedCharacters,
-               range: range,
-               changeInLength: (str as NSString).length - range.length)
+               range: safeRange,
+               changeInLength: (str as NSString).length - safeRange.length)
         endEditing()
     }
     
     override public func setAttributes(_ attrs: [NSAttributedString.Key: Any]?, range: NSRange) {
+        let safeRange = clampedRange(range)
         beginEditing()
-        backingStore.setAttributes(attrs, range: range)
-        edited(.editedAttributes, range: range, changeInLength: 0)
+        backingStore.setAttributes(attrs, range: safeRange)
+        edited(.editedAttributes, range: safeRange, changeInLength: 0)
         endEditing()
     }
     

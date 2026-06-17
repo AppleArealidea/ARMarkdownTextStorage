@@ -13,6 +13,10 @@ let package = Package(
     targets: [
         .target(
             name: "ARMarkdownTextStorage",
-            path: "ARMarkdownTextStorage/Source")
+            path: "ARMarkdownTextStorage/Source"),
+        .testTarget(
+            name: "ARMarkdownTextStorageTests",
+            dependencies: ["ARMarkdownTextStorage"],
+            path: "Tests/ARMarkdownTextStorageTests")
     ]
 )
